@@ -4,6 +4,10 @@
   </a>
 </p>
 
+# NKO
+
+This project contains code for the nko data donation study
+
 # Port: A frontend for data donation
 
 Port is a research tool that enables individuals to donate their digital trace data for academic research in a secure, transparent, and privacy-preserving way.
