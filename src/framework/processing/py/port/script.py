@@ -216,9 +216,12 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
     df = youtube.watch_history_to_df(youtube_zip, validation)
     if not df.empty:
         table_title = props.Translatable({"en": "Youtube watch history", "nl": "Youtube watch history"})
+        #vis = [
+        #   create_chart("area", "Youtube videos bekeken", "Youtube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
+        #   create_chart("bar", "Activiteit per uur van de dag", "Activity per hour of the day", "Date standard format", y_label="Aantal videos", date_format="hour_cycle"),
+        #]
         vis = [
-           create_chart("area", "Youtube videos bekeken", "Youtube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
-           create_chart("bar", "Activiteit per uur van de dag", "Activity per hour of the day", "Date standard format", y_label="Aantal videos", date_format="hour_cycle"),
+            create_wordcloud("Channels Watched",'Channels Watched', "Channel")
         ]
         table =  props.PropsUIPromptConsentFormTable("youtube_watch_history", table_title, df, visualizations=vis) 
         tables_to_render.append(table)
