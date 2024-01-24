@@ -52,7 +52,7 @@ function getVocabulary (
         vocabulary[token].docFreq += 1
         seen.add(token)
       }
-      const v = Number(values?.[i]) ?? 1
+      const v = values?.[i] !== undefined ? Number(values?.[i]) : 1
       if (!isNaN(v)) vocabulary[token].value += v
     }
   }
