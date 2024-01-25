@@ -41,7 +41,7 @@ def process(session_id):
 
     # progress in %
     subflows = len(platforms)
-    steps = 2
+    steps = 3
     step_percentage = (100 / subflows) / steps
     progress = 0
 
@@ -110,6 +110,16 @@ def process(session_id):
                 LOGGER.info("Data donated; %s", platform_name)
                 yield donate_logs(f"{session_id}-tracking")
                 yield donate(platform_name, consent_result.value)
+
+                progress += step_percentage
+                questionnaire_results = yield render_questionnaire(progress)
+
+                if questionnaire_results.__type__ == "PayloadJSON":
+                    yield donate(f"{session_id}-questionnaire-donation", questionnaire_results.value)
+                else:
+                    LOGGER.info("Skipped questionnaire: %s", platform_name)
+                    yield donate_logs(f"{session_id}-tracking")
+
             else:
                 LOGGER.info("Skipped ater reviewing consent: %s", platform_name)
                 yield donate_logs(f"{session_id}-tracking")
@@ -334,3 +344,54 @@ def donate(key, json_string):
 
 def exit(code, info):
     return CommandSystemExit(code, info)
+
+
+###############################################################################################
+# Questionnaire questions
+
+UNDERSTANDING = props.Translatable({
+    "en": "How would you describe the information that you shared with Utrecht University researchers?",
+    "nl": "Hoe zou u de gegevens omschrijven die u heeft gedeeld met onderzoekers van Universiteit Utrecht?"
+})
+
+INDENTIFY_CONSUMPTION = props.Translatable({"en": "In case you looked at the data presented on this page, did you recognise your Netflix watching patterns?", "nl": "Als u naar uw data gekeken hebt, in hoeverre herkent u uw eigen kijkgedrag?"})
+IDENTIFY_CONSUMPTION_CHOICES = [
+    props.Translatable({"en": "I recognized my Netflix watching patterns", "nl": "Ik herkende mijn Netflix kijkgedrag"}),
+    props.Translatable({"en": "I recognized my Netflix watching patterns and patters of those I share my account with", "nl": "Ik herkende mijn eigen Netflix kijkgedrag en die van anderen met wie ik mijn account deel"}),
+    props.Translatable({"en": "I recognized mostly the watching patterns of those I share my account with", "nl": "Ik herkende vooral het kijkgedrag van anderen met wie ik mijn account deel"}),
+    props.Translatable({"en": "I did not look at my data ", "nl": "Ik heb niet naar mijn gegevens gekeken"}),
+    props.Translatable({"en": "Other", "nl": "Anders"})
+]
+
+ENJOYMENT = props.Translatable({"en": "In case you looked at the data presented on this page, how interesting did you find looking at your data?", "nl": "Als u naar uw data hebt gekeken, hoe interessant vond u het om daar naar te kijken?"})
+ENJOYMENT_CHOICES = [
+    props.Translatable({"en": "not at all interesting", "nl": "Helemaal niet interessant"}),
+    props.Translatable({"en": "somewhat uninteresting", "nl": "Een beetje oninteressant"}),
+    props.Translatable({"en": "neither interesting nor uninteresting", "nl": "Niet interessant, niet oninteressant"}),
+    props.Translatable({"en": "somewhat interesting", "nl": "Een beetje interessant"}),
+    props.Translatable({"en": "very interesting", "nl": "Erg interessant"})
+]
+
+ADDITIONAL_COMMENTS = props.Translatable({
+    "en": "Do you have any additional comments about the donation? Please add them here.",
+    "nl": "Heeft u nog andere opmerkingen? Laat die hier achter."
+})
+
+
+def render_questionnaire(progress):
+    questions = [
+        props.PropsUIQuestionOpen(question=UNDERSTANDING, id=1),
+        props.PropsUIQuestionMultipleChoice(question=INDENTIFY_CONSUMPTION, id=2, choices=IDENTIFY_CONSUMPTION_CHOICES),
+        props.PropsUIQuestionMultipleChoice(question=ENJOYMENT, id=3, choices=ENJOYMENT_CHOICES),
+        props.PropsUIQuestionMultipleChoiceCheckbox(question=ENJOYMENT, id=3, choices=ENJOYMENT_CHOICES),
+        props.PropsUIQuestionOpen(question=ADDITIONAL_COMMENTS, id=4),
+    ]
+
+    description = props.Translatable({"en": "Below you can find a couple of questions about the data donation process", "nl": "Hieronder vind u een paar vragen over het data donatie process"})
+    header = props.PropsUIHeader(props.Translatable({"en": "Questionnaire", "nl": "Vragenlijst"}))
+    body = props.PropsUIPromptQuestionnaire(questions=questions, description=description)
+    footer = props.PropsUIFooter(progress)
+
+    page = props.PropsUIPageDonation("page", header, body, footer)
+    return CommandUIRender(page)
+
