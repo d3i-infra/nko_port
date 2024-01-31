@@ -350,14 +350,14 @@ def exit(code, info):
 # Questionnaire questions
 
 UNDERSTANDING = props.Translatable({
-    "en": "How would you describe the information that you shared with Utrecht University researchers?",
-    "nl": "Hoe zou u de gegevens omschrijven die u heeft gedeeld met onderzoekers van Universiteit Utrecht?"
+    "en": "How would you describe the information that you shared with University of Amsterdam researchers?",
+    "nl": "Hoe zou u de gegevens omschrijven die u heeft gedeeld met onderzoekers van Universiteit van Amsterdam?"
 })
 
-INDENTIFY_CONSUMPTION = props.Translatable({"en": "In case you looked at the data presented on this page, did you recognise your Netflix watching patterns?", "nl": "Als u naar uw data gekeken hebt, in hoeverre herkent u uw eigen kijkgedrag?"})
+INDENTIFY_CONSUMPTION = props.Translatable({"en": "In case you looked at the data presented on this page, did you recognise your YouTube watching patterns?", "nl": "Als u naar uw data gekeken hebt, in hoeverre herkent u uw eigen kijkgedrag?"})
 IDENTIFY_CONSUMPTION_CHOICES = [
-    props.Translatable({"en": "I recognized my Netflix watching patterns", "nl": "Ik herkende mijn Netflix kijkgedrag"}),
-    props.Translatable({"en": "I recognized my Netflix watching patterns and patters of those I share my account with", "nl": "Ik herkende mijn eigen Netflix kijkgedrag en die van anderen met wie ik mijn account deel"}),
+    props.Translatable({"en": "I recognized my YouTube watching patterns", "nl": "Ik herkende mijn YouTube kijkgedrag"}),
+    props.Translatable({"en": "I recognized my YouTube watching patterns and patters of those I share my account with", "nl": "Ik herkende mijn eigen YouTube kijkgedrag en die van anderen met wie ik mijn account deel"}),
     props.Translatable({"en": "I recognized mostly the watching patterns of those I share my account with", "nl": "Ik herkende vooral het kijkgedrag van anderen met wie ik mijn account deel"}),
     props.Translatable({"en": "I did not look at my data ", "nl": "Ik heb niet naar mijn gegevens gekeken"}),
     props.Translatable({"en": "Other", "nl": "Anders"})
