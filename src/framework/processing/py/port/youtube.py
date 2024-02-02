@@ -282,6 +282,7 @@ def watch_history_extract_html(bytes: io.BytesIO) -> pd.DataFrame:
             child_all_text_list = v.xpath("text()")
 
             datetime = child_all_text_list.pop()
+            datetime = helpers.fix_ascii_string(datetime)
             atags = v.xpath("a")
 
             try:
@@ -341,6 +342,7 @@ def search_history_extract_html(bytes: io.BytesIO) -> pd.DataFrame:
             child_all_text_list = s.xpath("text()")
 
             datetime = child_all_text_list.pop()
+            datetime = helpers.fix_ascii_string(datetime)
             atags = s.xpath("a")
 
             try:

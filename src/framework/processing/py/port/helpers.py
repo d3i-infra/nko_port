@@ -265,6 +265,23 @@ def fix_latin1_string(input: str) -> str:
         return fixed_string
     except Exception:
         return input
+    
+
+def fix_ascii_string(input: str) -> str:
+    """
+    Fixes the string encoding by attempting to encode it ignoring all ascii characters and then decoding it.
+
+    Args:
+        input (str): The input string that needs to be fixed.
+
+    Returns:
+        str: The fixed string after encoding and decoding, or the original string if an exception occurs.
+    """
+    try:
+        fixed_string = input.encode("ascii", 'ignore').decode()
+        return fixed_string
+    except Exception:
+        return input
 
 
 def try_to_convert_any_timestamp_to_iso8601(timestamp: str) -> str:
