@@ -39,6 +39,7 @@ DDP_CATEGORIES = [
             "my-comments.html",
             "my-live-chat-messages.html",
             "subscriptions.csv",
+            "comments.csv",
         ],
     ),
     DDPCategory(
@@ -51,6 +52,7 @@ DDP_CATEGORIES = [
             "my-comments.html",
             "my-live-chat-messages.html",
             "subscriptions.csv",
+            "comments.csv",
         ],
     ),
     DDPCategory(
@@ -62,6 +64,7 @@ DDP_CATEGORIES = [
             "kijkgeschiedenis.json",
             "mijn-reacties.html",
             "abonnementen.csv",
+            "comments.csv",
         ],
     ),
     DDPCategory(
@@ -139,55 +142,55 @@ def bytes_to_soup(buf: io.BytesIO) -> BeautifulSoup:
     return soup
 
 
-def my_comments_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataFrame:
-    """
-    Parses my-comments.html or mijn-reacties.html from Youtube DDP
+#def my_comments_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataFrame:
+#    """
+#    Parses my-comments.html or mijn-reacties.html from Youtube DDP
+#
+#    input string to zipfile output df 
+#    with the comment, type of comment, and a video url
+#    """
 
-    input string to zipfile output df 
-    with the comment, type of comment, and a video url
-    """
-
-    data_set = []
-    video_pattern = re.compile(VIDEO_REGEX)
-    df = pd.DataFrame()
+#    data_set = []
+#    video_pattern = re.compile(VIDEO_REGEX)
+#    df = pd.DataFrame()
 
     # Determine the language of the file name
-    file_name = "my-comments.html"
-    if validation.ddp_category.language == Language.NL:
-        file_name = "mijn-reacties.html"
+#    file_name = "my-comments.html"
+#    if validation.ddp_category.language == Language.NL:
+#        file_name = "mijn-reacties.html"
 
-    comments = unzipddp.extract_file_from_zip(youtube_zip, file_name)
+#    comments = unzipddp.extract_file_from_zip(youtube_zip, file_name)
         
-    try:
-        soup = bytes_to_soup(comments)
-        items = soup.find_all("li")
-        for item in items:
-            data_point = {}
+#    try:
+#        soup = bytes_to_soup(comments)
+#        items = soup.find_all("li")
+#        for item in items:
+#            data_point = {}
 
             # Extract comments
-            content = item.get_text(separator="<SEP>").split("<SEP>")
-            message = content.pop()
-            action = "".join(content)
-            data_point["Comment"] = message
-            data_point["Type of comment"] = action
+#            content = item.get_text(separator="<SEP>").split("<SEP>")
+#            message = content.pop()
+#            action = "".join(content)
+#            data_point["Comment"] = message
+#            data_point["Type of comment"] = action
 
             # Search through all references
             # if a video can be found:
             # 1. extract video url
             # 2. add data point
-            for ref in item.find_all("a"):
-                regex_result = video_pattern.match(ref.get("href"))
-                if regex_result:
-                    data_point["Video url"] = regex_result.group("video_url")
-                    data_set.append(data_point)
-                    break
+#            for ref in item.find_all("a"):
+#                regex_result = video_pattern.match(ref.get("href"))
+#                if regex_result:
+#                    data_point["Video url"] = regex_result.group("video_url")
+#                    data_set.append(data_point)
+#                    break
 
-        df = pd.DataFrame(data_set)
+#        df = pd.DataFrame(data_set)
 
-    except Exception as e:
-        logger.error("Exception was caught:  %s", e)
+#    except Exception as e:
+#        logger.error("Exception was caught:  %s", e)
 
-    return df
+#    return df
 
 
 # Extract Watch later.csv
@@ -231,6 +234,21 @@ def subscriptions_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataF
     df = unzipddp.read_csv_from_bytes_to_df(ratings_bytes)
     return df
 
+# Extract comments.csv
+def my_comments_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataFrame:
+    """
+    Parses 'subscriptions.csv' or 'abonnementen.csv' from Youtube DDP
+    """
+
+    # Determine the language of the file name
+    file_name = "comments.csv"
+    if validation.ddp_category.language == Language.NL:
+        file_name = "comments.csv"
+
+    ratings_bytes = unzipddp.extract_file_from_zip(youtube_zip, file_name)
+    df = unzipddp.read_csv_from_bytes_to_df(ratings_bytes)
+    return df
+
 
 # Extract watch history
 def watch_history_extract_html(bytes: io.BytesIO) -> pd.DataFrame:
@@ -243,14 +261,28 @@ def watch_history_extract_html(bytes: io.BytesIO) -> pd.DataFrame:
 
     try:
         tree = etree.HTML(bytes.read())
+        outer_container_class = "outer-cell mdl-cell mdl-cell--12-col mdl-shadow--2dp"
         watch_history_container_class = "content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1"
-        r = tree.xpath(f"//div[@class='{watch_history_container_class}']")
+        ads_container_class = "content-cell mdl-cell mdl-cell--12-col mdl-typography--caption"
+        r = tree.xpath(f"//div[@class='{outer_container_class}']")
 
         for e in r:
-            child_all_text_list = e.xpath("text()")
+            is_ad = False
+            ads_container = e.xpath(f"./div/div[@class='{ads_container_class}']")[0]
+            ad_text = "".join(ads_container.xpath("text()"))
+            if ads_container is not None and "Google Ads" in ad_text:
+                is_ad = True
+            
+            if is_ad: 
+                ad = "Yes"
+            else: 
+                ad = "No"
+            v = e.xpath(f"./div/div[@class='{watch_history_container_class}']")[0]
+            
+            child_all_text_list = v.xpath("text()")
 
             datetime = child_all_text_list.pop()
-            atags = e.xpath("a")
+            atags = v.xpath("a")
 
             try:
                 title = atags[0].text
@@ -269,9 +301,68 @@ def watch_history_extract_html(bytes: io.BytesIO) -> pd.DataFrame:
                 logger.debug("Could not find the channel name")
 
             datapoints.append(
-                (title, video_url, channel_name, datetime)
+                (title, video_url, ad, channel_name, datetime)
             )
-        out = pd.DataFrame(datapoints, columns=["Title", "Url", "Channel", "Date"])
+        out = pd.DataFrame(datapoints, columns=["Title", "Url", "Advertisement", "Channel", "Date"])
+
+    except Exception as e:
+        logger.error("Exception was caught:  %s", e)
+
+    return out
+
+# Extract watch history
+def search_history_extract_html(bytes: io.BytesIO) -> pd.DataFrame:
+    """
+    watch-history.html bytes buffer to pandas dataframe
+    """
+
+    out = pd.DataFrame()
+    datapoints = []
+
+    try:
+        tree = etree.HTML(bytes.read())
+        outer_container_class = "outer-cell mdl-cell mdl-cell--12-col mdl-shadow--2dp"
+        search_history_container_class = "content-cell mdl-cell mdl-cell--6-col mdl-typography--body-1"
+        ads_container_class = "content-cell mdl-cell mdl-cell--12-col mdl-typography--caption"
+        r = tree.xpath(f"//div[@class='{outer_container_class}']")
+
+        for e in r:
+            is_ad = False
+            ads_container = e.xpath(f"./div/div[@class='{ads_container_class}']")[0]
+            ad_text = "".join(ads_container.xpath("text()"))
+            if ads_container is not None and "Google Ads" in ad_text:
+                is_ad = True
+            
+            if is_ad: 
+                continue
+
+            s = e.xpath(f"./div/div[@class='{search_history_container_class}']")[0]
+
+            child_all_text_list = s.xpath("text()")
+
+            datetime = child_all_text_list.pop()
+            atags = s.xpath("a")
+
+            try:
+                title = atags[0].text
+                video_url = atags[0].get("href")
+            except:
+                if len(child_all_text_list) != 0:
+                    title = child_all_text_list[0]
+                else:
+                    title = None
+                video_url = None
+                logger.debug("Could not find a title")
+            try:
+                channel_name = atags[1].text
+            except:
+                channel_name = None
+                logger.debug("Could not find the channel name")
+
+            datapoints.append(
+                (title, video_url, datetime)
+            )
+        out = pd.DataFrame(datapoints, columns=["Search Terms", "Url", "Date"])
 
     except Exception as e:
         logger.error("Exception was caught:  %s", e)
@@ -291,6 +382,25 @@ def watch_history_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataF
 
         html_bytes_buf = unzipddp.extract_file_from_zip(youtube_zip, file_name)
         out = watch_history_extract_html(html_bytes_buf)
+        out["Date standard format"] = out["Date"].apply(helpers.try_to_convert_any_timestamp_to_iso8601)
+
+    else:
+        out = pd.DataFrame([("Er zit wel data in jouw data package, maar we hebben het er niet uitgehaald")], columns=["Extraction not implemented"])
+
+    return out
+
+def search_history_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataFrame:
+    """
+    Works for search-history.html and zoekgeschiedenis.html
+    """
+    if validation.ddp_category.ddp_filetype == DDPFiletype.HTML:
+        # Determine the language of the file name
+        file_name = "search-history.html"
+        if validation.ddp_category.language == Language.NL:
+            file_name = "zoekgeschiedenis.html"
+
+        html_bytes_buf = unzipddp.extract_file_from_zip(youtube_zip, file_name)
+        out = search_history_extract_html(html_bytes_buf)
         out["Date standard format"] = out["Date"].apply(helpers.try_to_convert_any_timestamp_to_iso8601)
 
     else:

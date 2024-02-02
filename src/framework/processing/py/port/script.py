@@ -209,18 +209,18 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
         tables_to_render.append(table)
 
     # Extract Watch later.csv
-    df = youtube.watch_later_to_df(youtube_zip)
-    if not df.empty:
-        table_title = props.Translatable({"en": "Youtube watch later", "nl": "Youtube watch later"})
-        table =  props.PropsUIPromptConsentFormTable("youtube_watch_later", table_title, df) 
-        tables_to_render.append(table)
+    #df = youtube.watch_later_to_df(youtube_zip)
+    #if not df.empty:
+    #    table_title = props.Translatable({"en": "Youtube watch later", "nl": "Youtube watch later"})
+    #    table =  props.PropsUIPromptConsentFormTable("youtube_watch_later", table_title, df) 
+    #    tables_to_render.append(table)
 
     # Extract subscriptions.csv
-    df = youtube.subscriptions_to_df(youtube_zip, validation)
-    if not df.empty:
-        table_title = props.Translatable({"en": "Youtube subscriptions", "nl": "Youtube subscriptions"})
-        table =  props.PropsUIPromptConsentFormTable("youtube_subscriptions", table_title, df) 
-        tables_to_render.append(table)
+    #df = youtube.subscriptions_to_df(youtube_zip, validation)
+    #if not df.empty:
+    #    table_title = props.Translatable({"en": "Youtube subscriptions", "nl": "Youtube subscriptions"})
+    #    table =  props.PropsUIPromptConsentFormTable("youtube_subscriptions", table_title, df) 
+    #    tables_to_render.append(table)
 
     # Extract subscriptions.csv
     df = youtube.watch_history_to_df(youtube_zip, validation)
@@ -236,12 +236,18 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
         table =  props.PropsUIPromptConsentFormTable("youtube_watch_history", table_title, df, visualizations=vis) 
         tables_to_render.append(table)
 
-    # Extract live chat messages
-    df = youtube.my_live_chat_messages_to_df(youtube_zip, validation)
+    df = youtube.search_history_to_df(youtube_zip, validation)
     if not df.empty:
-        table_title = props.Translatable({"en": "Youtube my live chat messages", "nl": "Youtube my live chat messages"})
-        table =  props.PropsUIPromptConsentFormTable("youtube_my_live_chat_messages", table_title, df) 
+        table_title = props.Translatable({"en": "Youtube search history", "nl": "Youtube search history"})
+        table =  props.PropsUIPromptConsentFormTable("youtube_searches", table_title, df) 
         tables_to_render.append(table)
+
+    # Extract live chat messages
+    #df = youtube.my_live_chat_messages_to_df(youtube_zip, validation)
+    #if not df.empty:
+    #    table_title = props.Translatable({"en": "Youtube my live chat messages", "nl": "Youtube my live chat messages"})
+    #    table =  props.PropsUIPromptConsentFormTable("youtube_my_live_chat_messages", table_title, df) 
+    #    tables_to_render.append(table)
 
     return tables_to_render
 
