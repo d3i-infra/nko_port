@@ -239,7 +239,10 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
     df = youtube.search_history_to_df(youtube_zip, validation)
     if not df.empty:
         table_title = props.Translatable({"en": "Youtube search history", "nl": "Youtube search history"})
-        table =  props.PropsUIPromptConsentFormTable("youtube_searches", table_title, df) 
+        vis = [
+            create_wordcloud("Search Terms",'Search Terms', "Search Terms")
+        ]
+        table =  props.PropsUIPromptConsentFormTable("youtube_searches", table_title, df, visualizations = vis) 
         tables_to_render.append(table)
 
     # Extract live chat messages
