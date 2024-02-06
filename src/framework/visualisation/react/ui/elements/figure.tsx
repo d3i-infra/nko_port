@@ -47,24 +47,26 @@ export const Figure = ({
 
   const { errorMsg, noDataMsg } = useMemo(() => prepareCopy(locale), [locale])
 
-  if ((visualizationData == null) && status === 'loading') {
+  if (visualizationData == null && status === 'loading') {
     return (
-      <div className='w-12 h-12'>
+      <div className="w-12 h-12">
         <Lottie animationData={spinnerDark} loop />
       </div>
     )
   }
 
-  if (status === 'error') { return <div className='flex justify-center items-center text-error'>{errorMsg}</div> }
+  if (status === 'error') {
+    return <div className="flex justify-center items-center text-error">{errorMsg}</div>
+  }
 
   const visualizationHeightTruthy = Boolean(visualization.height)
   const minHeight = visualizationHeightTruthy ? `${visualization.height ?? ''} px` : '20rem'
 
   return (
-    <div className='flex flex-col overflow-hidden'>
-      <Title6 text={title} margin='mt-2 mb-4' />
+    <div className="flex flex-col overflow-hidden" style={{ height: '100%', width: '100%' }}>
+      <Title6 text={title} margin="mt-2 mb-4" />
       <div
-        className='relative z-50 flex max-w-full'
+        className="relative z-50 flex max-w-full"
         style={{ flex: `1 1 ${minHeight}`, minHeight }}
       >
         <RenderVisualization visualizationData={visualizationData} fallbackMessage={noDataMsg} />
@@ -84,7 +86,7 @@ const RenderVisualization = memo(
     if (visualizationData == null) return null
 
     const fallback = (
-      <div className='m-auto font-bodybold text-4xl text-grey2 '>{fallbackMessage}</div>
+      <div className="m-auto font-bodybold text-4xl text-grey2 ">{fallbackMessage}</div>
     )
 
     if (['line', 'bar', 'area'].includes(visualizationData.type)) {
@@ -95,8 +97,7 @@ const RenderVisualization = memo(
     }
 
     if (visualizationData.type === 'wordcloud') {
-      const textVisualizationData: TextVisualizationData =
-        visualizationData
+      const textVisualizationData: TextVisualizationData = visualizationData
       if (textVisualizationData.topTerms.length === 0) return fallback
       return <VisxWordcloud visualizationData={textVisualizationData} />
     }
@@ -105,7 +106,7 @@ const RenderVisualization = memo(
   }
 )
 
-function prepareCopy (locale: string): Record<string, string> {
+function prepareCopy(locale: string): Record<string, string> {
   return {
     errorMsg: Translator.translate(errorMsg, locale),
     noDataMsg: Translator.translate(noDataMsg, locale)

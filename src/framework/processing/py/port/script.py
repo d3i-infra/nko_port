@@ -231,6 +231,7 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
         #   create_chart("bar", "Activiteit per uur van de dag", "Activity per hour of the day", "Date standard format", y_label="Aantal videos", date_format="hour_cycle"),
         #]
         vis = [
+            create_chart("area", "Youtube videos bekeken", "Youtube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
             create_wordcloud("Channels Watched",'Channels Watched', "Channel")
         ]
         table =  props.PropsUIPromptConsentFormTable("youtube_watch_history", table_title, df, visualizations=vis) 
@@ -261,31 +262,37 @@ def extract_tiktok(tiktok_file: str, validation: validate.ValidateInput) -> list
     df = tiktok.video_browsing_history_to_df(tiktok_file, validation)
     if not df.empty:
         table_title = props.Translatable({"en": "Tiktok video browsing history", "nl": "Tiktok video browsing history"})
-        table =  props.PropsUIPromptConsentFormTable("tiktok_video_browsing_history", table_title, df) 
+        vis = [
+            create_chart("area", "TikTok videos bekeken", "TikTok videos watched", "Date", y_label="Aantal videos", date_format="auto"),
+        ]
+        table =  props.PropsUIPromptConsentFormTable("tiktok_video_browsing_history", table_title, df, visualizations=vis) 
         tables_to_render.append(table)
 
+    df = tiktok.search_history_to_df(tiktok_file, validation)
+    if not df.empty:
+        table_title = props.Translatable({"en": "Tiktok search history", "nl": "Tiktok search history"})
+        vis = [
+            create_wordcloud("Search Term",'Search Term', "Search Term")
+        ]
+        table =  props.PropsUIPromptConsentFormTable("tiktok_search_history", table_title, df, visualizations=vis) 
+        tables_to_render.append(table)
+        
     df = tiktok.favorite_videos_to_df(tiktok_file, validation)
     if not df.empty:
         table_title = props.Translatable({"en": "Tiktok favorite videos", "nl": "Tiktok favorite videos"})
         table =  props.PropsUIPromptConsentFormTable("tiktok_favorite_videos", table_title, df) 
         tables_to_render.append(table)
 
-    df = tiktok.following_to_df(tiktok_file, validation)
-    if not df.empty:
-        table_title = props.Translatable({"en": "Tiktok following", "nl": "Tiktok following"})
-        table =  props.PropsUIPromptConsentFormTable("tiktok_following", table_title, df) 
-        tables_to_render.append(table)
+    #df = tiktok.following_to_df(tiktok_file, validation)
+    #if not df.empty:
+    #    table_title = props.Translatable({"en": "Tiktok following", "nl": "Tiktok following"})
+    #    table =  props.PropsUIPromptConsentFormTable("tiktok_following", table_title, df) 
+    #    tables_to_render.append(table)
 
     df = tiktok.like_to_df(tiktok_file, validation)
     if not df.empty:
         table_title = props.Translatable({"en": "Tiktok likes", "nl": "Tiktok likes"})
         table =  props.PropsUIPromptConsentFormTable("tiktok_like", table_title, df) 
-        tables_to_render.append(table)
-
-    df = tiktok.search_history_to_df(tiktok_file, validation)
-    if not df.empty:
-        table_title = props.Translatable({"en": "Tiktok search history", "nl": "Tiktok search history"})
-        table =  props.PropsUIPromptConsentFormTable("tiktok_search_history", table_title, df) 
         tables_to_render.append(table)
 
     df = tiktok.share_history_to_df(tiktok_file, validation)
@@ -294,17 +301,17 @@ def extract_tiktok(tiktok_file: str, validation: validate.ValidateInput) -> list
         table =  props.PropsUIPromptConsentFormTable("tiktok_share_history", table_title, df) 
         tables_to_render.append(table)
 
-    df = tiktok.comment_to_df(tiktok_file, validation)
-    if not df.empty:
-        table_title = props.Translatable({"en": "Tiktok comment history", "nl": "Tiktok comment history"})
-        table =  props.PropsUIPromptConsentFormTable("tiktok_comment", table_title, df) 
-        tables_to_render.append(table)
+    #df = tiktok.comment_to_df(tiktok_file, validation)
+    #if not df.empty:
+    #    table_title = props.Translatable({"en": "Tiktok comment history", "nl": "Tiktok comment history"})
+    #    table =  props.PropsUIPromptConsentFormTable("tiktok_comment", table_title, df) 
+    #    tables_to_render.append(table)
 
-    df = tiktok.watch_live_history_to_df(tiktok_file, validation)
-    if not df.empty:
-        table_title = props.Translatable({"en": "Tiktok watch live history", "nl": "Tiktok watch live history"})
-        table =  props.PropsUIPromptConsentFormTable("tiktok_watch_live_history", table_title, df) 
-        tables_to_render.append(table)
+    #df = tiktok.watch_live_history_to_df(tiktok_file, validation)
+    #if not df.empty:
+    #    table_title = props.Translatable({"en": "Tiktok watch live history", "nl": "Tiktok watch live history"})
+    #    table =  props.PropsUIPromptConsentFormTable("tiktok_watch_live_history", table_title, df) 
+    #    tables_to_render.append(table)
 
     return tables_to_render
 
