@@ -366,13 +366,13 @@ def exit(code, info):
 # Questionnaire questions
 
 UNDERSTANDING = props.Translatable({
-    "en": "How would you describe the information that you shared with University of Amsterdam researchers?",
-    "nl": "Hoe zou u de gegevens omschrijven die u heeft gedeeld met onderzoekers van Universiteit van Amsterdam?"
+    "en": "How would you describe the information you shared with the researchers at the University of Amsterdam?",
+    "nl": "Hoe zou u de informatie omschrijven die u heeft gedeeld met de onderzoekers van de Universiteit van Amsterdam?"
 })
 
-INDENTIFY_CONSUMPTION = props.Translatable({"en": "In case you looked at the data presented on this page, did you recognise your YouTube watching patterns?", "nl": "Als u naar uw data gekeken hebt, in hoeverre herkent u uw eigen kijkgedrag?"})
+INDENTIFY_CONSUMPTION = props.Translatable({"en": "If you have viewed the information, to what extent do you recognize your own viewing behavior on YouTube?", "nl": "Als u de informatie heeft bekeken, in hoeverre herkent u dan uw eigen kijkgedrag op YouTube?"})
 IDENTIFY_CONSUMPTION_CHOICES = [
-    props.Translatable({"en": "I recognized my YouTube watching patterns", "nl": "Ik herkende mijn YouTube kijkgedrag"}),
+    props.Translatable({"en": "I recognized my viewing behavior on YouTube", "nl": "Ik herkende mijn kijkgedrag op YouTube"}),
     props.Translatable({"en": "I recognized my YouTube watching patterns and patters of those I share my account with", "nl": "Ik herkende mijn eigen YouTube kijkgedrag en die van anderen met wie ik mijn account deel"}),
     props.Translatable({"en": "I recognized mostly the watching patterns of those I share my account with", "nl": "Ik herkende vooral het kijkgedrag van anderen met wie ik mijn account deel"}),
     props.Translatable({"en": "I did not look at my data ", "nl": "Ik heb niet naar mijn gegevens gekeken"}),
@@ -388,6 +388,12 @@ ENJOYMENT_CHOICES = [
     props.Translatable({"en": "very interesting", "nl": "Erg interessant"})
 ]
 
+AWARENESS = props.Translatable({"en": "Did you know that TikTok collected this data about you?", "nl":"Wist u dat TikTok deze gegevens over u verzamelde?"})
+AWARENESS_CHOICES = [
+    props.Translatable({"en":"Yes", "nl": "Ja"}),
+    props.Translatable({"en":"No", "nl": "Nee"})
+]
+
 ADDITIONAL_COMMENTS = props.Translatable({
     "en": "Do you have any additional comments about the donation? Please add them here.",
     "nl": "Heeft u nog andere opmerkingen? Laat die hier achter."
@@ -400,7 +406,8 @@ def render_questionnaire(progress):
         props.PropsUIQuestionMultipleChoice(question=INDENTIFY_CONSUMPTION, id=2, choices=IDENTIFY_CONSUMPTION_CHOICES),
         props.PropsUIQuestionMultipleChoice(question=ENJOYMENT, id=3, choices=ENJOYMENT_CHOICES),
         props.PropsUIQuestionMultipleChoiceCheckbox(question=ENJOYMENT, id=3, choices=ENJOYMENT_CHOICES),
-        props.PropsUIQuestionOpen(question=ADDITIONAL_COMMENTS, id=4),
+        props.PropsUIQuestionMultipleChoice(question=AWARENESS, id=4, choices=AWARENESS_CHOICES),
+        props.PropsUIQuestionOpen(question=ADDITIONAL_COMMENTS, id=5),
     ]
 
     description = props.Translatable({"en": "Below you can find a couple of questions about the data donation process", "nl": "Hieronder vind u een paar vragen over het data donatie process"})
