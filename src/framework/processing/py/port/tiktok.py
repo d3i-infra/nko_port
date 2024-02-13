@@ -70,8 +70,14 @@ def validate(file: Path) -> ValidateInput:
 
     # submission was something else
     except zipfile.BadZipFile:
-        if file == "user_data.json":
-            validation.set_ddp_category("text_file_json_en")
+        file_path = Path(file)
+        if file_path.name == "user_data.json":
+            validation.ddp_category = DDPCategory(
+                id = "text_file_json_en",
+                ddp_filetype=DDPFiletype.JSON,
+                language=Language.EN,
+                known_files=["user_data.json"]
+            )
             validation.set_status_code(0)
         else:
             validation.set_status_code(2)

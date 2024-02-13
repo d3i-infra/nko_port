@@ -31,13 +31,8 @@ def process(session_id):
 
     platforms = [ ("Youtube", extract_youtube, youtube.validate), ("TikTok", extract_tiktok, tiktok.validate),  ]
 
-    #platforms = [ ("LinkedIn", extract_linkedin, linkedin.validate), ]
-    #platforms = [ ("Instagram", extract_instagram, instagram.validate), ]
-    #platforms = [ ("Chrome", extract_chrome, chrome.validate), ]
-    #platforms = [ ("Facebook", extract_facebook, facebook.validate), ]
     #platforms = [ ("Youtube", extract_youtube, youtube.validate), ]
     #platforms = [ ("TikTok", extract_tiktok, tiktok.validate), ]
-    #platforms = [ ("Twitter", extract_twitter, twitter.validate), ]
 
     # progress in %
     subflows = len(platforms)
@@ -57,7 +52,7 @@ def process(session_id):
         # Prompt file extraction loop
         while True:
             LOGGER.info("Prompt for file for %s", platform_name)
-            yield donate_logs(f"{session_id}-tracking")
+            yield donate_logs(f"{session_id}-{platform_name}-tracking")
 
             # Render the propmt file page
             promptFile = prompt_file("application/zip, text/plain, application/json", platform_name)
@@ -68,9 +63,8 @@ def process(session_id):
 
                 # DDP is recognized: Status code zero
                 if validation.status_code.id == 0: 
-                    print("EXTRACTION START")
                     LOGGER.info("Payload for %s", platform_name)
-                    yield donate_logs(f"{session_id}-tracking")
+                    yield donate_logs(f"{session_id}-{platform_name}-tracking")
 
                     table_list = extraction_fun(file_result.value, validation)
                     break
@@ -78,18 +72,18 @@ def process(session_id):
                 # DDP is not recognized: Different status code
                 if validation.status_code.id != 0: 
                     LOGGER.info("Not a valid %s zip; No payload; prompt retry_confirmation", platform_name)
-                    yield donate_logs(f"{session_id}-tracking")
+                    yield donate_logs(f"{session_id}-{platform_name}-tracking")
                     retry_result = yield render_donation_page(platform_name, retry_confirmation(platform_name), progress)
 
                     if retry_result.__type__ == "PayloadTrue":
                         continue
                     else:
                         LOGGER.info("Skipped during retry %s", platform_name)
-                        yield donate_logs(f"{session_id}-tracking")
+                        yield donate_logs(f"{session_id}-{platform_name}-tracking")
                         break
             else:
                 LOGGER.info("Skipped %s", platform_name)
-                yield donate_logs(f"{session_id}-tracking")
+                yield donate_logs(f"{session_id}-{platform_name}-tracking")
                 break
 
         progress += step_percentage
@@ -97,9 +91,9 @@ def process(session_id):
         # Render data on screen
         if table_list is not None:
             LOGGER.info("Prompt consent; %s", platform_name)
-            yield donate_logs(f"{session_id}-tracking")
+            yield donate_logs(f"{session_id}-{platform_name}-tracking")
 
-            # Check if extract something got extracted
+            # Check if something got extracted
             if len(table_list) == 0:
                 table_list.append(create_empty_table(platform_name))
 
@@ -108,21 +102,23 @@ def process(session_id):
 
             if consent_result.__type__ == "PayloadJSON":
                 LOGGER.info("Data donated; %s", platform_name)
-                yield donate_logs(f"{session_id}-tracking")
                 yield donate(platform_name, consent_result.value)
+                yield donate_logs(f"{session_id}-{platform_name}-tracking")
+                yield donate_status(f"{session_id}-{platform_name}-DONATED", "DONATED")
 
                 progress += step_percentage
                 questionnaire_results = yield render_questionnaire(progress)
 
                 if questionnaire_results.__type__ == "PayloadJSON":
-                    yield donate(f"{session_id}-questionnaire-donation", questionnaire_results.value)
+                    yield donate(f"{session_id}-{platform_name}-questionnaire-donation", questionnaire_results.value)
                 else:
                     LOGGER.info("Skipped questionnaire: %s", platform_name)
-                    yield donate_logs(f"{session_id}-tracking")
+                    yield donate_logs(f"{session_id}-{platform_name}-tracking")
 
             else:
                 LOGGER.info("Skipped ater reviewing consent: %s", platform_name)
-                yield donate_logs(f"{session_id}-tracking")
+                yield donate_logs(f"{session_id}-{platform_name}-tracking")
+                yield donate_status(f"{session_id}-{platform_name}-SKIP-REVIEW-CONSENT", "SKIP_REVIEW_CONSENT")
 
     yield exit(0, "Success")
     yield render_end_page()
@@ -318,7 +314,6 @@ def extract_tiktok(tiktok_file: str, validation: validate.ValidateInput) -> list
 
 
 ##########################################
-# Functions provided by Eyra did not change
 
 def render_end_page():
     page = props.PropsUIPageEnd()
@@ -358,9 +353,13 @@ def prompt_file(extensions, platform):
 def donate(key, json_string):
     return CommandSystemDonate(key, json_string)
 
+
 def exit(code, info):
     return CommandSystemExit(code, info)
 
+
+def donate_status(filename: str, message: str):
+    return donate(filename, json.dumps({"status": message}))
 
 ###############################################################################################
 # Questionnaire questions
