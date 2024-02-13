@@ -5,7 +5,7 @@ script_location='./src/framework/processing/py/port/script.py'
 single_platform='platforms = \[ ("'
 single_platform_commented_out='#platforms = \[ ("'
 
-platforms=("Youtube" "TikTok")
+platforms=("YouTube" "TikTok")
 
 for platform in "${platforms[@]}"; do
 

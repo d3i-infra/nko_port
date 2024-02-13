@@ -29,9 +29,9 @@ def process(session_id):
     LOGGER.info("Starting the donation flow")
     yield donate_logs(f"{session_id}-tracking")
 
-    platforms = [ ("Youtube", extract_youtube, youtube.validate), ("TikTok", extract_tiktok, tiktok.validate),  ]
+    platforms = [ ("YouTube", extract_youtube, youtube.validate), ("TikTok", extract_tiktok, tiktok.validate),  ]
 
-    #platforms = [ ("Youtube", extract_youtube, youtube.validate), ]
+    #platforms = [ ("YouTube", extract_youtube, youtube.validate), ]
     #platforms = [ ("TikTok", extract_tiktok, tiktok.validate), ]
 
     # progress in %
@@ -107,7 +107,7 @@ def process(session_id):
                 yield donate_status(f"{session_id}-{platform_name}-DONATED", "DONATED")
 
                 progress += step_percentage
-                questionnaire_results = yield render_questionnaire(progress)
+                questionnaire_results = yield render_questionnaire(progress, platform_name)
 
                 if questionnaire_results.__type__ == "PayloadJSON":
                     yield donate(f"{session_id}-{platform_name}-questionnaire-donation", questionnaire_results.value)
@@ -200,34 +200,34 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
     # Extract comments
     df = youtube.my_comments_to_df(youtube_zip, validation)
     if not df.empty:
-        table_title = props.Translatable({"en": "Youtube comments", "nl": "Youtube comments"})
+        table_title = props.Translatable({"en": "YouTube comments", "nl": "YouTube comments"})
         table =  props.PropsUIPromptConsentFormTable("youtube_comments", table_title, df) 
         tables_to_render.append(table)
 
     # Extract Watch later.csv
     #df = youtube.watch_later_to_df(youtube_zip)
     #if not df.empty:
-    #    table_title = props.Translatable({"en": "Youtube watch later", "nl": "Youtube watch later"})
+    #    table_title = props.Translatable({"en": "YouTube watch later", "nl": "YouTube watch later"})
     #    table =  props.PropsUIPromptConsentFormTable("youtube_watch_later", table_title, df) 
     #    tables_to_render.append(table)
 
     # Extract subscriptions.csv
     #df = youtube.subscriptions_to_df(youtube_zip, validation)
     #if not df.empty:
-    #    table_title = props.Translatable({"en": "Youtube subscriptions", "nl": "Youtube subscriptions"})
+    #    table_title = props.Translatable({"en": "YouTube subscriptions", "nl": "YouTube subscriptions"})
     #    table =  props.PropsUIPromptConsentFormTable("youtube_subscriptions", table_title, df) 
     #    tables_to_render.append(table)
 
     # Extract subscriptions.csv
     df = youtube.watch_history_to_df(youtube_zip, validation)
     if not df.empty:
-        table_title = props.Translatable({"en": "Youtube watch history", "nl": "Youtube watch history"})
+        table_title = props.Translatable({"en": "YouTube watch history", "nl": "YouTube watch history"})
         #vis = [
-        #   create_chart("area", "Youtube videos bekeken", "Youtube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
+        #   create_chart("area", "YouTube videos bekeken", "YouTube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
         #   create_chart("bar", "Activiteit per uur van de dag", "Activity per hour of the day", "Date standard format", y_label="Aantal videos", date_format="hour_cycle"),
         #]
         vis = [
-            create_chart("area", "Youtube videos bekeken", "Youtube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
+            create_chart("area", "YouTube videos bekeken", "YouTube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
             create_wordcloud("Channels Watched",'Channels Watched', "Channel")
         ]
         table =  props.PropsUIPromptConsentFormTable("youtube_watch_history", table_title, df, visualizations=vis) 
@@ -235,7 +235,7 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
 
     df = youtube.search_history_to_df(youtube_zip, validation)
     if not df.empty:
-        table_title = props.Translatable({"en": "Youtube search history", "nl": "Youtube search history"})
+        table_title = props.Translatable({"en": "YouTube search history", "nl": "YouTube search history"})
         vis = [
             create_wordcloud("Search Terms",'Search Terms', "Search Terms")
         ]
@@ -245,7 +245,7 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
     # Extract live chat messages
     #df = youtube.my_live_chat_messages_to_df(youtube_zip, validation)
     #if not df.empty:
-    #    table_title = props.Translatable({"en": "Youtube my live chat messages", "nl": "Youtube my live chat messages"})
+    #    table_title = props.Translatable({"en": "YouTube my live chat messages", "nl": "YouTube my live chat messages"})
     #    table =  props.PropsUIPromptConsentFormTable("youtube_my_live_chat_messages", table_title, df) 
     #    tables_to_render.append(table)
 
@@ -364,49 +364,57 @@ def donate_status(filename: str, message: str):
 ###############################################################################################
 # Questionnaire questions
 
-UNDERSTANDING = props.Translatable({
-    "en": "How would you describe the information you shared with the researchers at the University of Amsterdam?",
-    "nl": "Hoe zou u de informatie omschrijven die u heeft gedeeld met de onderzoekers van de Universiteit van Amsterdam?"
-})
+def render_questionnaire(progress, platform_name):
 
-INDENTIFY_CONSUMPTION = props.Translatable({"en": "If you have viewed the information, to what extent do you recognize your own viewing behavior on YouTube?", "nl": "Als u de informatie heeft bekeken, in hoeverre herkent u dan uw eigen kijkgedrag op YouTube?"})
-IDENTIFY_CONSUMPTION_CHOICES = [
-    props.Translatable({"en": "I recognized my viewing behavior on YouTube", "nl": "Ik herkende mijn kijkgedrag op YouTube"}),
-    props.Translatable({"en": "I recognized my YouTube watching patterns and patters of those I share my account with", "nl": "Ik herkende mijn eigen YouTube kijkgedrag en die van anderen met wie ik mijn account deel"}),
-    props.Translatable({"en": "I recognized mostly the watching patterns of those I share my account with", "nl": "Ik herkende vooral het kijkgedrag van anderen met wie ik mijn account deel"}),
-    props.Translatable({"en": "I did not look at my data ", "nl": "Ik heb niet naar mijn gegevens gekeken"}),
-    props.Translatable({"en": "Other", "nl": "Anders"})
-]
+    understanding = props.Translatable({
+        "en": "How would you describe the information you shared with the researchers at the University of Amsterdam?",
+        "nl": "Hoe zou u de informatie omschrijven die u heeft gedeeld met de onderzoekers van de Universiteit van Amsterdam?"
+    })
 
-ENJOYMENT = props.Translatable({"en": "In case you looked at the data presented on this page, how interesting did you find looking at your data?", "nl": "Als u naar uw data hebt gekeken, hoe interessant vond u het om daar naar te kijken?"})
-ENJOYMENT_CHOICES = [
-    props.Translatable({"en": "not at all interesting", "nl": "Helemaal niet interessant"}),
-    props.Translatable({"en": "somewhat uninteresting", "nl": "Een beetje oninteressant"}),
-    props.Translatable({"en": "neither interesting nor uninteresting", "nl": "Niet interessant, niet oninteressant"}),
-    props.Translatable({"en": "somewhat interesting", "nl": "Een beetje interessant"}),
-    props.Translatable({"en": "very interesting", "nl": "Erg interessant"})
-]
+    indentify_consumption = props.Translatable({"en": f"If you have viewed the information, to what extent do you recognize your own viewing behavior on {platform_name}?",
+                                                "nl": f"Als u de informatie heeft bekeken, in hoeverre herkent u dan uw eigen kijkgedrag op {platform_name}?"})
+    identify_consumption_choices = [
+        props.Translatable({"en": f"I recognized my viewing behavior on {platform_name}",
+                            "nl": f"Ik herkende mijn kijkgedrag op {platform_name}"}),
+        props.Translatable({"en": f"I recognized my {platform_name} watching patterns and patters of those I share my account with",
+                            "nl": f"Ik herkende mijn eigen {platform_name} kijkgedrag en die van anderen met wie ik mijn account deel"}),
+        props.Translatable({"en": f"I recognized mostly the watching patterns of those I share my account with",
+                            "nl": f"Ik herkende vooral het kijkgedrag van anderen met wie ik mijn account deel"}),
+        props.Translatable({"en": f"I did not look at my data ",
+                            "nl": f"Ik heb niet naar mijn gegevens gekeken"}),
+        props.Translatable({"en": f"Other",
+                            "nl": f"Anders"})
+    ]
 
-AWARENESS = props.Translatable({"en": "Did you know that TikTok collected this data about you?", "nl":"Wist u dat TikTok deze gegevens over u verzamelde?"})
-AWARENESS_CHOICES = [
-    props.Translatable({"en":"Yes", "nl": "Ja"}),
-    props.Translatable({"en":"No", "nl": "Nee"})
-]
+    enjoyment = props.Translatable({"en": "In case you looked at the data presented on this page, how interesting did you find looking at your data?", "nl": "Als u naar uw data hebt gekeken, hoe interessant vond u het om daar naar te kijken?"})
+    enjoyment_choices = [
+        props.Translatable({"en": "not at all interesting", "nl": "Helemaal niet interessant"}),
+        props.Translatable({"en": "somewhat uninteresting", "nl": "Een beetje oninteressant"}),
+        props.Translatable({"en": "neither interesting nor uninteresting", "nl": "Niet interessant, niet oninteressant"}),
+        props.Translatable({"en": "somewhat interesting", "nl": "Een beetje interessant"}),
+        props.Translatable({"en": "very interesting", "nl": "Erg interessant"})
+    ]
 
-ADDITIONAL_COMMENTS = props.Translatable({
-    "en": "Do you have any additional comments about the donation? Please add them here.",
-    "nl": "Heeft u nog andere opmerkingen? Laat die hier achter."
-})
+    awareness = props.Translatable({"en": f"Did you know that {platform_name} collected this data about you?",
+                                    "nl": f"Wist u dat {platform_name} deze gegevens over u verzamelde?"})
+    awareness_choices = [
+        props.Translatable({"en":"Yes", "nl": "Ja"}),
+        props.Translatable({"en":"No", "nl": "Nee"})
+    ]
+
+    additional_comments = props.Translatable({
+        "en": "Do you have any additional comments about the donation? Please add them here.",
+        "nl": "Heeft u nog andere opmerkingen? Laat die hier achter."
+    })
 
 
-def render_questionnaire(progress):
     questions = [
-        props.PropsUIQuestionOpen(question=UNDERSTANDING, id=1),
-        props.PropsUIQuestionMultipleChoice(question=INDENTIFY_CONSUMPTION, id=2, choices=IDENTIFY_CONSUMPTION_CHOICES),
-        props.PropsUIQuestionMultipleChoice(question=ENJOYMENT, id=3, choices=ENJOYMENT_CHOICES),
-        props.PropsUIQuestionMultipleChoiceCheckbox(question=ENJOYMENT, id=3, choices=ENJOYMENT_CHOICES),
-        props.PropsUIQuestionMultipleChoice(question=AWARENESS, id=4, choices=AWARENESS_CHOICES),
-        props.PropsUIQuestionOpen(question=ADDITIONAL_COMMENTS, id=5),
+        props.PropsUIQuestionOpen(question=understanding, id=1),
+        props.PropsUIQuestionMultipleChoice(question=indentify_consumption, id=2, choices=identify_consumption_choices),
+        props.PropsUIQuestionMultipleChoice(question=enjoyment, id=3, choices=enjoyment_choices),
+        props.PropsUIQuestionMultipleChoiceCheckbox(question=enjoyment, id=3, choices=enjoyment_choices),
+        props.PropsUIQuestionMultipleChoice(question=awareness, id=4, choices=awareness_choices),
+        props.PropsUIQuestionOpen(question=additional_comments, id=5),
     ]
 
     description = props.Translatable({"en": "Below you can find a couple of questions about the data donation process", "nl": "Hieronder vind u een paar vragen over het data donatie process"})
