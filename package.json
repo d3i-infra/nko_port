@@ -39,6 +39,7 @@
     "build": "npm run build:py && npm run build:app && npm run build:css",
     "archive": "cd build && zip -r ../release.zip .",
     "release": "npm run build && npm run archive",
+    "release_platform": "npm run build && cd build && zip -r ../release-$PLATFORM.zip .",
     "test": "react-scripts test",
     "lint": "npm run fix:ts",
     "watch": "concurrently 'npm run dev:start' 'nodemon --ext py --exec \"npm run build:py\"'",
