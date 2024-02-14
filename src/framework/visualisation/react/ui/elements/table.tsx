@@ -275,6 +275,8 @@ function Cell ({
     setTooltip((tooltip: Tooltip) => (tooltip.show ? { ...tooltip, show: false } : tooltip))
   }
 
+  const isUrl = isValidHttpUrl(cell.text)
+
   return (
     <div
       className={`relative ${cellClass}`}
@@ -286,17 +288,44 @@ function Cell ({
         ref={textRef}
         className='whitespace-nowrap max-w-[15rem] overflow-hidden overflow-ellipsis z-10'
       >
+
+     {isUrl ? (
+        <Url urlText={cell.text} />
+     ) : (
         <Highlighter
           searchWords={searchWords}
           autoEscape
           textToHighlight={cell.text}
           highlightClassName='bg-tertiary rounded-sm'
         />
+      )}
+
       </div>
       {overflows && <TooltipIcon />}
     </div>
   )
 }
+
+
+function isValidHttpUrl (value: string): Boolean {
+  let url
+  try {
+    url = new URL(value)
+  } catch (_) {
+    return false
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:'
+}
+
+
+function Url (props: {urlText: string}): JSX.Element {
+  return (
+    <div className="text-primary underline">
+      <a href={props.urlText} target="_blank" rel="noopener noreferrer">{props.urlText}</a>
+    </div>
+  )
+}
+
 
 function TooltipIcon (): JSX.Element {
   return (
