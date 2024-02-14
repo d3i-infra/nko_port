@@ -22,6 +22,15 @@ export const Questionnaire = (props: Props): JSX.Element => {
   const [answers, setAnswers] = React.useState<{}>({})
   const copy = prepareCopy(locale)
 
+  React.useEffect(() => {
+    // check if running in an iframe
+    if (window.frameElement) {
+      window.parent.scrollTo(0,0)
+    } else {
+      window.scrollTo(0,0)
+    }
+  }, [])
+
   function handleDonate (): void {
     const value = JSON.stringify(answers)
     resolve?.({ __type__: 'PayloadJSON', value })
