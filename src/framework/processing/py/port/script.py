@@ -197,13 +197,6 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
     """
     tables_to_render = []
 
-    # Extract comments
-    df = youtube.my_comments_to_df(youtube_zip, validation)
-    if not df.empty:
-        table_title = props.Translatable({"en": "YouTube comments", "nl": "YouTube comments"})
-        table =  props.PropsUIPromptConsentFormTable("youtube_comments", table_title, df) 
-        tables_to_render.append(table)
-
     # Extract Watch later.csv
     #df = youtube.watch_later_to_df(youtube_zip)
     #if not df.empty:
@@ -221,25 +214,32 @@ def extract_youtube(youtube_zip: str, validation: validate.ValidateInput) -> lis
     # Extract subscriptions.csv
     df = youtube.watch_history_to_df(youtube_zip, validation)
     if not df.empty:
-        table_title = props.Translatable({"en": "YouTube watch history", "nl": "YouTube watch history"})
+        table_title = props.Translatable({"en": "YouTube watch history", "nl": "Kijkgeschiedenis van YouTube video’s"})
         #vis = [
         #   create_chart("area", "YouTube videos bekeken", "YouTube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
         #   create_chart("bar", "Activiteit per uur van de dag", "Activity per hour of the day", "Date standard format", y_label="Aantal videos", date_format="hour_cycle"),
         #]
         vis = [
-            create_chart("area", "YouTube videos bekeken", "YouTube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
-            create_wordcloud("Channels Watched",'Channels Watched', "Channel")
+            create_chart("area", "Het aantal YouTube video’s dat u heeft bekeken over tijd", "YouTube videos watched", "Date standard format", y_label="Aantal videos", date_format="auto"),
+            create_wordcloud("Uw meest bekeken YouTube kanalen",'Channels Watched', "Channel")
         ]
         table =  props.PropsUIPromptConsentFormTable("youtube_watch_history", table_title, df, visualizations=vis) 
         tables_to_render.append(table)
 
     df = youtube.search_history_to_df(youtube_zip, validation)
     if not df.empty:
-        table_title = props.Translatable({"en": "YouTube search history", "nl": "YouTube search history"})
+        table_title = props.Translatable({"en": "YouTube search history", "nl": "Uw zoekgeschiedenis op YouTube"})
         vis = [
-            create_wordcloud("Search Terms",'Search Terms', "Search Terms")
+            create_wordcloud("Uw meest gebruikte zoektermen op YouTube",'Search Terms', "Search Terms")
         ]
         table =  props.PropsUIPromptConsentFormTable("youtube_searches", table_title, df, visualizations = vis) 
+        tables_to_render.append(table)
+
+    # Extract comments
+    df = youtube.my_comments_to_df(youtube_zip, validation)
+    if not df.empty:
+        table_title = props.Translatable({"en": "YouTube comments", "nl": "YouTube reacties"})
+        table =  props.PropsUIPromptConsentFormTable("youtube_comments", table_title, df) 
         tables_to_render.append(table)
 
     # Extract live chat messages
@@ -412,7 +412,6 @@ def render_questionnaire(progress, platform_name):
         props.PropsUIQuestionOpen(question=understanding, id=1),
         props.PropsUIQuestionMultipleChoice(question=indentify_consumption, id=2, choices=identify_consumption_choices),
         props.PropsUIQuestionMultipleChoice(question=enjoyment, id=3, choices=enjoyment_choices),
-        props.PropsUIQuestionMultipleChoiceCheckbox(question=enjoyment, id=3, choices=enjoyment_choices),
         props.PropsUIQuestionMultipleChoice(question=awareness, id=4, choices=awareness_choices),
         props.PropsUIQuestionOpen(question=additional_comments, id=5),
     ]
