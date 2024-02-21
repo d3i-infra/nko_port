@@ -234,6 +234,7 @@ def subscriptions_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataF
     df = unzipddp.read_csv_from_bytes_to_df(ratings_bytes)
     return df
 
+
 # Extract comments.csv
 def my_comments_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataFrame:
     """
@@ -376,37 +377,49 @@ def watch_history_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataF
     """
     Works for watch-history.html and kijkgeschiedenis.html
     """
-    if validation.ddp_category.ddp_filetype == DDPFiletype.HTML:
-        # Determine the language of the file name
-        file_name = "watch-history.html"
-        if validation.ddp_category.language == Language.NL:
-            file_name = "kijkgeschiedenis.html"
+    out = pd.DataFrame()
 
-        html_bytes_buf = unzipddp.extract_file_from_zip(youtube_zip, file_name)
-        out = watch_history_extract_html(html_bytes_buf)
-        out["Date standard format"] = out["Date"].apply(helpers.try_to_convert_any_timestamp_to_iso8601)
+    try:
+        if validation.ddp_category.ddp_filetype == DDPFiletype.HTML:
+            # Determine the language of the file name
+            file_name = "watch-history.html"
+            if validation.ddp_category.language == Language.NL:
+                file_name = "kijkgeschiedenis.html"
 
-    else:
-        out = pd.DataFrame([("Er zit wel data in jouw data package, maar we hebben het er niet uitgehaald")], columns=["Extraction not implemented"])
+            html_bytes_buf = unzipddp.extract_file_from_zip(youtube_zip, file_name)
+            out = watch_history_extract_html(html_bytes_buf)
+            out["Date standard format"] = out["Date"].apply(helpers.try_to_convert_any_timestamp_to_iso8601)
+
+        else:
+            out = pd.DataFrame([("Er zit wel data in jouw data package, maar we hebben het er niet uitgehaald")], columns=["Extraction not implemented"])
+
+    except Exception as e:
+        logger.error("Exception was caught:  %s", e)
 
     return out
+
 
 def search_history_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataFrame:
     """
     Works for search-history.html and zoekgeschiedenis.html
     """
-    if validation.ddp_category.ddp_filetype == DDPFiletype.HTML:
-        # Determine the language of the file name
-        file_name = "search-history.html"
-        if validation.ddp_category.language == Language.NL:
-            file_name = "zoekgeschiedenis.html"
+    out = pd.DataFrame()
 
-        html_bytes_buf = unzipddp.extract_file_from_zip(youtube_zip, file_name)
-        out = search_history_extract_html(html_bytes_buf)
-        out["Date standard format"] = out["Date"].apply(helpers.try_to_convert_any_timestamp_to_iso8601)
+    try:
+        if validation.ddp_category.ddp_filetype == DDPFiletype.HTML:
+            # Determine the language of the file name
+            file_name = "search-history.html"
+            if validation.ddp_category.language == Language.NL:
+                file_name = "zoekgeschiedenis.html"
 
-    else:
-        out = pd.DataFrame([("Er zit wel data in jouw data package, maar we hebben het er niet uitgehaald")], columns=["Extraction not implemented"])
+            html_bytes_buf = unzipddp.extract_file_from_zip(youtube_zip, file_name)
+            out = search_history_extract_html(html_bytes_buf)
+            out["Date standard format"] = out["Date"].apply(helpers.try_to_convert_any_timestamp_to_iso8601)
+
+        else:
+            out = pd.DataFrame([("Er zit wel data in jouw data package, maar we hebben het er niet uitgehaald")], columns=["Extraction not implemented"])
+    except Exception as e:
+        logger.error("Exception was caught:  %s", e)
 
     return out
 
