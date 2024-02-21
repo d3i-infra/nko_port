@@ -64,7 +64,7 @@ DDP_CATEGORIES = [
             "kijkgeschiedenis.json",
             "mijn-reacties.html",
             "abonnementen.csv",
-            "comments.csv",
+            "reacties.csv",
         ],
     ),
     DDPCategory(
@@ -238,13 +238,13 @@ def subscriptions_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataF
 # Extract comments.csv
 def my_comments_to_df(youtube_zip: str, validation: ValidateInput) -> pd.DataFrame:
     """
-    Parses 'subscriptions.csv' or 'abonnementen.csv' from Youtube DDP
+    Parses 'comments.csv' or 'reacties.csv' from Youtube DDP
     """
 
     # Determine the language of the file name
     file_name = "comments.csv"
     if validation.ddp_category.language == Language.NL:
-        file_name = "comments.csv"
+        file_name = "reacties.csv"
 
     ratings_bytes = unzipddp.extract_file_from_zip(youtube_zip, file_name)
     df = unzipddp.read_csv_from_bytes_to_df(ratings_bytes)
@@ -271,7 +271,7 @@ def watch_history_extract_html(bytes: io.BytesIO) -> pd.DataFrame:
             is_ad = False
             ads_container = e.xpath(f"./div/div[@class='{ads_container_class}']")[0]
             ad_text = "".join(ads_container.xpath("text()"))
-            if ads_container is not None and "Google Ads" in ad_text:
+            if ads_container is not None and ("Google Ads" in ad_text or "Google Adverteren" in ad_text):
                 is_ad = True
             
             if is_ad: 
@@ -332,7 +332,7 @@ def search_history_extract_html(bytes: io.BytesIO) -> pd.DataFrame:
             is_ad = False
             ads_container = e.xpath(f"./div/div[@class='{ads_container_class}']")[0]
             ad_text = "".join(ads_container.xpath("text()"))
-            if ads_container is not None and "Google Ads" in ad_text:
+            if ads_container is not None and ("Google Ads" in ad_text or "Google Adverteren" in ad_text):
                 is_ad = True
             
             if is_ad: 
