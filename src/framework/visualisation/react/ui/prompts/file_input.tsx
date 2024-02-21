@@ -94,10 +94,10 @@ const selectButtonLabel = (): Translatable => {
 
 const note = (): Translatable => {
   return new TextBundle()
-    .add('en', 'Note: The process to extract the correct data from the file is done on your own computer. No data is stored or sent yet.')
+    .add('en', 'Note: The process to extract the correct data from the file is done on your own computer. No data is stored or sent yet. If you are on a Mac computer, it might be that the folder with your data got unpacked automatically. In this case, right click on the folder (it should be called "Takeout") and click on "Compress" to make it a .zip file and upload it after.')
     .add(
       'nl',
-      'NB: Het proces om de juiste gegevens uit het bestand te halen gebeurt op uw eigen computer. Er worden nog geen gegevens opgeslagen of verstuurd.'
+      'NB: Het proces om de juiste gegevens uit het bestand te halen gebeurt op uw eigen computer. Er worden nog geen gegevens opgeslagen of verstuurd. Als je op een Mac-computer werkt, kan het zijn dat de map met je gegevens automatisch is uitgepakt. Klik in dat geval met de rechtermuisknop op de map (die "Takeout" zou moeten heten) en klik op "Comprimeer" om er een .zip-bestand van te maken en upload het daarna.'
     )
 }
 
