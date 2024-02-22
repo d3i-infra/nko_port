@@ -95,6 +95,7 @@ def process(session_id):
 
             # Check if something got extracted
             if len(table_list) == 0:
+                yield donate_status(f"{session_id}-{platform_name}-NO-DATA-FOUND", "NO_DATA_FOUND")
                 table_list.append(create_empty_table(platform_name))
 
             prompt = assemble_tables_into_form(table_list)
@@ -149,8 +150,8 @@ def create_empty_table(platform_name: str) -> props.PropsUIPromptConsentFormTabl
     Show something in case no data was extracted
     """
     title = props.Translatable({
-       "en": "Er ging niks mis, maar we konden niks vinden",
-       "nl": "Er ging niks mis, maar we konden niks vinden"
+       "en": "Er ging niks mis, maar we konden geen gegevens in jouw data vinden",
+       "nl": "Er ging niks mis, maar we konden geen gegevens in jouw data vinden",
     })
     df = pd.DataFrame(["No data found"], columns=["No data found"])
     table = props.PropsUIPromptConsentFormTable(f"{platform_name}_no_data_found", title, df)
