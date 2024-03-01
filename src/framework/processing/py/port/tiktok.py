@@ -103,7 +103,7 @@ def video_browsing_history_to_df(tiktok_zip: str, validation: ValidateInput) -> 
     out = pd.DataFrame()
 
     try: 
-        history = d["Activity"]["Video Browsing History"].get("VideoList", [])
+        history = d["Activity"]["Video Browsing History"]["VideoList"]
         for item in history:
             datapoints.append((item.get("Date", None), item.get("Link", None)))
 
@@ -122,7 +122,7 @@ def favorite_videos_to_df(tiktok_zip: str, validation: ValidateInput) -> pd.Data
     out = pd.DataFrame()
 
     try: 
-        history = d["Activity"]["Favorite Videos"].get("FavoriteVideoList", [])
+        history = d["Activity"]["Favorite Videos"]["FavoriteVideoList"]
         for item in history:
             datapoints.append((item.get("Date", None), item.get("Link", None)))
 
@@ -141,7 +141,7 @@ def following_to_df(tiktok_zip: str, validation: ValidateInput) -> pd.DataFrame:
     out = pd.DataFrame()
 
     try: 
-        history = d["Activity"]["Following List"].get("Following", [])
+        history = d["Activity"]["Following List"]["Following"]
         for item in history:
             datapoints.append((item.get("Date", None), item.get("UserName", None)))
 
@@ -160,7 +160,7 @@ def like_to_df(tiktok_zip: str, validation: ValidateInput) -> pd.DataFrame:
     out = pd.DataFrame()
 
     try: 
-        history = d["Activity"]["Like List"].get("ItemFavoriteList", [])
+        history = d["Activity"]["Like List"]["ItemFavoriteList"]
         for item in history:
             datapoints.append((item.get("Date", None), item.get("Link", None)))
 
@@ -179,7 +179,7 @@ def search_history_to_df(tiktok_zip: str, validation: ValidateInput) -> pd.DataF
     out = pd.DataFrame()
 
     try: 
-        history = d["Activity"]["Search History"].get("SearchList", [])
+        history = d["Activity"]["Search History"]["SearchList"]
         for item in history:
             datapoints.append((
                 item.get("Date", None),
@@ -201,7 +201,7 @@ def share_history_to_df(tiktok_zip: str, validation: ValidateInput) -> pd.DataFr
     out = pd.DataFrame()
 
     try: 
-        history = d["Activity"]["Share History"].get("ShareHistoryList", [])
+        history = d["Activity"]["Share History"]["ShareHistoryList"]
         for item in history:
             datapoints.append((
                 item.get("Date", None), 
@@ -225,7 +225,7 @@ def comment_to_df(tiktok_zip: str, validation: ValidateInput) -> pd.DataFrame:
     out = pd.DataFrame()
 
     try: 
-        history = d["Comment"]["Comments"].get("CommentsList", [])
+        history = d["Comment"]["Comments"]["CommentsList"]
         for item in history:
             datapoints.append((
                 item.get("Date", None), 
